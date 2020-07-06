@@ -1,9 +1,24 @@
-require('dotenv').config()
+require('dotenv').config();
 const express = require('express');
 const massive = require('massive');
 const controller = require('./controller');
+const{CONNECTION_STRING}=process.env;
 const app = express();
 
 app.use(express.json());
 
-massive({connectionString: 'postgres://whddmqgsixspmm:c9cf093edc58717faf86fb25e6c881520a3711be1103dd64b1c8053b845f2f89@ec2-52-200-48-116.compute-1.amazonaws.com:5432/d45c0ia34stn13', ssl: {rejectUnauthorized: false}})
+massive({
+    connectionString: CONNECTION_STRING, ssl: {rejectUnauthorized: false
+}
+}).then(db => {
+    app.set('db',db);
+    console.log('db connected');
+});
+
+
+app.get('api/inventory', controller.getInventory);
+app.post('api/inventory', controller.addItem);
+app.put('api/inventory/:id', controller.editProduct);
+app.delete('api/inventory/:id', controller.deleteItem);
+
+app.listen(7000, () => console.log('Server is running on 7000'));
